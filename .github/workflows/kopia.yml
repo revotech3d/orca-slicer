@@ -1,0 +1,31 @@
+# Kopia wydania Orca Slicer: zmiana wersja.txt na main → pobranie plików z OrcaSlicer/OrcaSlicer i wydanie tutaj.
+name: Kopia wydania Orca Slicer
+on:
+  push:
+    branches: [main]
+    paths: [wersja.txt]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  kopia:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pobierz i opublikuj
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V=$(tr -d ' \n' < wersja.txt)
+          mkdir pliki && cd pliki
+          for f in "OrcaSlicer_Windows_Installer_V${V}_x64.exe" "OrcaSlicer_Windows_Installer_V${V}_arm64.exe" \
+                   "OrcaSlicer_Mac_universal_V${V}.dmg" "OrcaSlicer_Linux_AppImage_Ubuntu2404_V${V}.AppImage"; do
+            gh release download "v${V}" -R OrcaSlicer/OrcaSlicer -p "$f"
+          done
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+          gh release delete "v${V}" -R "$GITHUB_REPOSITORY" -y --cleanup-tag 2>/dev/null || true
+          gh release create "v${V}" -R "$GITHUB_REPOSITORY" --target main \
+            --title "Orca Slicer ${V} (sprawdzona z Revo OS)" \
+            --notes "Niezmienione pliki z https://github.com/OrcaSlicer/OrcaSlicer/releases/tag/v${V} (AGPL-3.0, kod źródłowy w repozytorium projektu). Sprawdzona z Revo OS i profilami Revotech. Profile i połączenie z drukarką: https://revo3d.pl/oprogramowanie/" \
+            *
