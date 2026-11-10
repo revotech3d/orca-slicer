@@ -19,7 +19,7 @@ jobs:
           V=$(tr -d ' \n' < wersja.txt)
           mkdir pliki && cd pliki
           for f in "OrcaSlicer_Windows_Installer_V${V}_x64.exe" "OrcaSlicer_Windows_Installer_V${V}_arm64.exe" \
-                   "OrcaSlicer_Mac_universal_V${V}.dmg" "OrcaSlicer_Linux_AppImage_Ubuntu2404_V${V}.AppImage"; do
+                   "OrcaSlicer_Mac_universal_V${V}.dmg"; do
             gh release download "v${V}" -R OrcaSlicer/OrcaSlicer -p "$f"
           done
           sha256sum * > SHA256SUMS.txt
